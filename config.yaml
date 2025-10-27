@@ -1,6 +1,6 @@
 wandb:
-  entity: thatguy11325
-  project: pokemon
+  entity: neocodes_dev-neocodes
+  project: Pokemon_Red_RL
   group: ~
 
 env:
