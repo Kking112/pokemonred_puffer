@@ -1,0 +1,43 @@
+# Hybrid DreamerV3 + PPO configuration for Pokemon Red
+# Uses DreamerV3 world model for representation learning with PPO for policy
+
+# Include base configuration
+defaults:
+  - config
+
+# Use PPO training but with Dreamer representations
+train:
+  # Standard PPO settings but with Dreamer policy
+  total_timesteps: 10_000_000_000
+  batch_size: 65536
+  minibatch_size: 2048
+  update_epochs: 3
+  learning_rate: 0.0001
+  use_rnn: True  # Use RSSM as recurrent state
+
+# Dreamer settings for hybrid mode
+dreamer:
+  algorithm: 'dreamer_ppo_hybrid'
+  
+  # World model architecture
+  deter_dim: 512
+  stoch_dim: 32
+  stoch_classes: 32
+  hidden_dim: 512
+  encoder_dim: 512
+  
+  # Text encoder
+  text_embed_dim: 128
+  text_num_heads: 4
+  text_num_layers: 2
+  text_output_dim: 128
+  
+  # Hybrid-specific settings
+  freeze_world_model: False  # Set to True if using pre-trained world model
+  policy_hidden_dim: 512
+  policy_num_layers: 2
+  
+  # World model pre-training (optional)
+  pretrain_world_model: False
+  pretrain_checkpoint: null  # Path to pre-trained world model
+

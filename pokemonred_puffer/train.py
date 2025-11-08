@@ -43,6 +43,18 @@ class Vectorization(Enum):
 
 
 def make_policy(env: RedGymEnv, policy_name: str, config: DictConfig) -> nn.Module:
+    # Check if using DreamerPPO hybrid
+    if hasattr(config, 'dreamer') and config.dreamer.get('algorithm') == 'dreamer_ppo_hybrid':
+        from pokemonred_puffer.models.dreamer_ppo_policy import create_dreamer_ppo_policy
+        
+        policy = create_dreamer_ppo_policy(
+            env=env,
+            config=config.dreamer,
+            freeze_world_model=config.dreamer.get('freeze_world_model', False),
+        )
+        return policy.to(config.train.device)
+    
+    # Standard policy creation
     policy_module_name, policy_class_name = policy_name.split(".")
     policy_module = importlib.import_module(f"pokemonred_puffer.policies.{policy_module_name}")
     policy_class = getattr(policy_module, policy_class_name)

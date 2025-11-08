@@ -41,6 +41,7 @@ from pokemonred_puffer.data.map import (
 from pokemonred_puffer.data.missable_objects import MissableFlags
 from pokemonred_puffer.data.party import PartyMons
 from pokemonred_puffer.data.strength_puzzles import STRENGTH_SOLUTIONS
+from pokemonred_puffer.data.text import MAX_TEXT_LENGTH, TextExtractor
 from pokemonred_puffer.data.tilesets import Tilesets
 from pokemonred_puffer.data.tm_hm import (
     CUT_SPECIES_IDS,
@@ -227,6 +228,9 @@ class RedGymEnv(Env):
             "game_corner_rocket": spaces.Box(low=0, high=1, shape=(1,), dtype=np.uint8),
             "saffron_guard": spaces.Box(low=0, high=1, shape=(1,), dtype=np.uint8),
             "lapras": spaces.Box(low=0, high=1, shape=(1,), dtype=np.uint8),
+            #* Text observations
+            "text": spaces.Box(low=0, high=255, shape=(MAX_TEXT_LENGTH,), dtype=np.uint8),
+            "text_is_displaying": spaces.Box(low=0, high=1, shape=(1,), dtype=np.uint8),
         }
         if not self.skip_safari_zone:
             obs_dict["safari_steps"] = spaces.Box(low=0, high=502.0, shape=(1,), dtype=np.uint32)
@@ -269,6 +273,10 @@ class RedGymEnv(Env):
 
         if self.save_video and self.n_record:
             self.save_video = self.env_id < self.n_record
+        
+        # Initialize text extractor
+        self.text_extractor = TextExtractor(self.pyboy)
+        
         self.init_mem()
 
     def register_hooks(self):
@@ -651,6 +659,9 @@ class RedGymEnv(Env):
         numBagItems = self.read_m("wNumBagItems")
         # item ids start at 1 so using 0 as the nothing value is okay
         bag[2 * numBagItems :] = 0
+        
+        # Extract text from game
+        text_ids, _, is_displaying = self.text_extractor.get_current_text()
 
         return (
             self.screen_obs()
@@ -688,6 +699,9 @@ class RedGymEnv(Env):
                     self.flags.get_bit("BIT_GAVE_SAFFRON_GUARDS_DRINK"), np.uint8
                 ),  # saffron guard
                 "lapras": np.array(self.flags.get_bit("BIT_GOT_LAPRAS"), np.uint8),  # got lapras
+                # Text observations
+                "text": text_ids,
+                "text_is_displaying": np.array(is_displaying, dtype=np.uint8),
             }
             | (
                 {}
