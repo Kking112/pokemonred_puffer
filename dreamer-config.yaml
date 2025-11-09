@@ -70,6 +70,7 @@ dreamer:
   checkpoint_dir: 'checkpoints/dreamerv3'
 
 env:
+  gb_path: red.gb
   # If true, run without rendering every step.
   headless: True
   # Directory to store video output.
