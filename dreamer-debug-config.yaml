@@ -1,0 +1,127 @@
+# DreamerV3 Debug Configuration for Quick Testing
+# Use this for debugging: python dreamer_train.py --config dreamer-debug-config.yaml
+
+wandb:
+  entity: neocodes_dev-neocodes
+  project: Pokemon_Red_RL
+  group: dreamerv3_debug
+
+dreamer:
+  algorithm: 'dreamerv3'
+  
+  # Small buffer for testing
+  replay_capacity: 10000
+  sequence_length: 10
+  batch_size: 4
+  prefill_steps: 100
+  
+  # Single environment for debugging
+  num_envs: 1
+  collect_interval: 50
+  
+  # Text encoder (reduced)
+  text_embed_dim: 64
+  text_num_heads: 2
+  text_num_layers: 1
+  text_output_dim: 64
+  
+  # Smaller world model for testing
+  deter_dim: 256
+  stoch_dim: 16
+  stoch_classes: 16
+  hidden_dim: 256
+  encoder_dim: 256
+  
+  # World model training
+  world_model_lr: 1e-4
+  world_model_train_steps: 1
+  kl_weight: 1.0
+  kl_balance: 0.8
+  free_nats: 1.0
+  
+  # Actor-critic (smaller)
+  actor_hidden_dim: 256
+  actor_num_layers: 1
+  critic_hidden_dim: 256
+  critic_num_layers: 1
+  num_critics: 2
+  
+  # Actor-critic training
+  actor_lr: 3e-5
+  critic_lr: 3e-5
+  actor_critic_train_steps: 1
+  imagination_horizon: 10
+  discount: 0.997
+  lambda_: 0.95
+  entropy_coef: 3e-4
+  
+  # Training (short for testing)
+  grad_clip: 100.0
+  use_amp: False  # Disable AMP for debugging
+  num_iterations: 10  # Just 10 iterations for testing
+  
+  # Logging
+  log_interval: 1
+  checkpoint_interval: 5
+  checkpoint_dir: 'checkpoints/dreamerv3_debug'
+
+env:
+  gb_path: red.gb
+  headless: True
+  video_dir: video
+  state_dir: pyboy_states
+  init_state: Bulbasaur
+  action_freq: 24
+  max_steps: 1000  # Shorter episodes for testing
+  save_video: False
+  fast_video: False
+  n_record: 0
+  perfect_ivs: False
+  reduce_res: True
+  two_bit: True
+  log_frequency: 100
+  auto_flash: True
+  disable_wild_encounters: False
+  disable_ai_actions: False
+  auto_teach_cut: False
+  auto_use_cut: False
+  auto_use_strength: True
+  auto_use_surf: True
+  auto_teach_surf: True
+  auto_teach_strength: True
+  auto_solve_strength_puzzles: True
+  auto_remove_all_nonuseful_items: True
+  auto_pokeflute: True
+  auto_next_elevator_floor: False
+  skip_safari_zone: False
+  infinite_safari_steps: False
+  insert_saffron_guard_drinks: False
+  infinite_money: True
+  infinite_health: False
+  use_global_map: False
+  save_state: True
+  animate_scripts: False
+  exploration_inc: 1.0
+  exploration_max: 1.0
+  max_steps_scaling: 0
+  map_id_scalefactor: 9.539340019226074
+  required_tolerance: null
+
+# Reward configuration for BaselineRewardEnv
+reward:
+  event: 1.0
+  bill_saved: 5.0
+  seen_pokemon: 4.0
+  caught_pokemon: 4.0
+  obtained_move_ids: 4.0
+  hm_count: 10.0
+  level: 1.0
+  badges: 10.0
+  exploration: 0.02
+  cut_coords: 1.0
+  cut_tiles: 1.0
+  start_menu: 0.01
+  pokemon_menu: 0.1
+  stats_menu: 0.1
+  bag_menu: 0.1
+

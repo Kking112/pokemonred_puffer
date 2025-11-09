@@ -458,6 +458,7 @@ class RedGymEnv(Env):
 
         self.valid_cut_coords = {}
         self.invalid_cut_coords = {}
+        self.cut_coords = {}  # Initialize cut_coords for BaselineRewardEnv compatibility
         self.cut_tiles = {}
 
         self.valid_pokeflute_coords = {}

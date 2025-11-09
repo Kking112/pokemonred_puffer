@@ -136,9 +136,12 @@ class RSSM(nn.Module):
     
     def flatten_stoch(self, stoch: torch.Tensor) -> torch.Tensor:
         """
-        Flatten stochastic state from (batch, stoch_dim, stoch_classes) to (batch, stoch_total).
+        Flatten stochastic state from (..., stoch_dim, stoch_classes) to (..., stoch_total).
+        Preserves all leading dimensions (batch, time, etc.).
         """
-        return stoch.reshape(-1, self.stoch_total)
+        # Get shape, preserving all leading dimensions
+        leading_dims = stoch.shape[:-2]  # All dimensions except last two
+        return stoch.reshape(*leading_dims, self.stoch_total)
     
     def get_latent(self, state: Dict[str, torch.Tensor]) -> torch.Tensor:
         """
@@ -349,16 +352,18 @@ class ObservationEncoder(nn.Module):
         state_dim: int,
         output_dim: int = 512,
         cnn_depth: int = 32,
+        two_bit: bool = True,
     ):
         """
         Initialize observation encoder.
         
         Args:
-            screen_shape: Shape of screen observation (H, W, C)
+            screen_shape: Shape of screen observation (H, W, C) - compressed if two_bit=True
             text_encoder: Text encoder module
             state_dim: Dimension of other state features (items, party, etc.)
             output_dim: Output embedding dimension
             cnn_depth: Base depth for CNN
+            two_bit: Whether observations use two-bit compression
         """
         super().__init__()
         
@@ -366,10 +371,38 @@ class ObservationEncoder(nn.Module):
         self.text_encoder = text_encoder
         self.state_dim = state_dim
         self.output_dim = output_dim
+        self.two_bit = two_bit
+        
+        # Calculate restored shape if two_bit compression is used
+        if self.two_bit:
+            # Restore width by multiplying by 4, keep height same
+            self.restored_shape = (screen_shape[0], screen_shape[1] * 4, screen_shape[2])
+        else:
+            self.restored_shape = screen_shape
+        
+        # Setup two_bit unpacking buffers (similar to multi_convolutional policy)
+        if self.two_bit:
+            self.register_buffer(
+                'screen_buckets',
+                torch.tensor([0, 85, 153, 255], dtype=torch.float32) / 255.0
+            )
+            self.register_buffer(
+                'linear_buckets',
+                torch.tensor([0, 85, 153, 255], dtype=torch.float32) / 255.0
+            )
+            self.register_buffer(
+                'unpack_mask',
+                torch.tensor([[192, 48, 12, 3]], dtype=torch.uint8)
+            )
+            self.register_buffer(
+                'unpack_shift',
+                torch.tensor([[6, 4, 2, 0]], dtype=torch.uint8)
+            )
         
         # Screen CNN encoder (similar to existing policy but for DreamerV3)
+        # Use restored shape for CNN input
         self.screen_cnn = nn.Sequential(
-            nn.Conv2d(screen_shape[2] * 2, cnn_depth, 8, stride=2),  # *2 for screen + visited_mask
+            nn.Conv2d(self.restored_shape[2] * 2, cnn_depth, 8, stride=2),  # *2 for screen + visited_mask
             nn.SiLU(),
             nn.Conv2d(cnn_depth, cnn_depth * 2, 4, stride=2),
             nn.SiLU(),
@@ -380,7 +413,8 @@ class ObservationEncoder(nn.Module):
         
         # Calculate CNN output dimension
         with torch.no_grad():
-            dummy_screen = torch.zeros(1, screen_shape[2] * 2, screen_shape[0], screen_shape[1])
+            dummy_screen = torch.zeros(1, self.restored_shape[2] * 2, 
+                                      self.restored_shape[0], self.restored_shape[1])
             cnn_out_dim = self.screen_cnn(dummy_screen).shape[1]
         
         # State MLP encoder
@@ -411,8 +445,31 @@ class ObservationEncoder(nn.Module):
             Observation embedding, shape (batch, output_dim)
         """
         # Process screen (concatenate screen and visited_mask)
-        screen = observations['screen'].float() / 255.0
-        visited_mask = observations['visited_mask'].float() / 255.0
+        screen = observations['screen']
+        visited_mask = observations['visited_mask']
+        
+        # Unpack two_bit compression if needed
+        if self.two_bit:
+            batch_size = screen.shape[0]
+            restored_shape = (batch_size, self.restored_shape[0], self.restored_shape[1], self.restored_shape[2])
+            
+            # Unpack screen
+            screen = torch.index_select(
+                self.screen_buckets,
+                0,
+                ((screen.reshape((-1, 1)) & self.unpack_mask) >> self.unpack_shift).flatten().int(),
+            ).reshape(restored_shape)
+            
+            # Unpack visited_mask
+            visited_mask = torch.index_select(
+                self.linear_buckets,
+                0,
+                ((visited_mask.reshape((-1, 1)) & self.unpack_mask) >> self.unpack_shift).flatten().int(),
+            ).reshape(restored_shape)
+        else:
+            # Normalize to [0, 1]
+            screen = screen.float() / 255.0
+            visited_mask = visited_mask.float() / 255.0
         
         # Permute from (batch, H, W, C) to (batch, C, H, W)
         screen = screen.permute(0, 3, 1, 2)
@@ -556,13 +613,14 @@ class DreamerV3WorldModel(nn.Module):
         stoch_classes: int = 32,
         hidden_dim: int = 512,
         encoder_dim: int = 512,
+        two_bit: bool = True,
     ):
         """
         Initialize world model.
         
         Args:
             action_dim: Dimension of action space
-            screen_shape: Shape of screen observation
+            screen_shape: Shape of screen observation (compressed if two_bit=True)
             text_encoder: Text encoder module
             state_dim: Dimension of other state features
             deter_dim: Dimension of deterministic RSSM state
@@ -570,11 +628,13 @@ class DreamerV3WorldModel(nn.Module):
             stoch_classes: Number of classes per categorical variable
             hidden_dim: Dimension of hidden layers
             encoder_dim: Dimension of observation encoder output
+            two_bit: Whether observations use two-bit compression
         """
         super().__init__()
         
         self.action_dim = action_dim
         self.screen_shape = screen_shape
+        self.two_bit = two_bit
         
         # RSSM
         self.rssm = RSSM(
@@ -591,6 +651,7 @@ class DreamerV3WorldModel(nn.Module):
             text_encoder=text_encoder,
             state_dim=state_dim,
             output_dim=encoder_dim,
+            two_bit=two_bit,
         )
         
         # Decoder

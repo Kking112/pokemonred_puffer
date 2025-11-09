@@ -191,7 +191,11 @@ class SequenceReplayBuffer:
                 sequences.append(seq)
             
             obs_array = np.stack(sequences, axis=0)
-            observations[name] = torch.from_numpy(obs_array).to(device)
+            tensor = torch.from_numpy(obs_array).to(device)
+            # Convert text to Long type for embedding layer
+            if name == 'text':
+                tensor = tensor.long()
+            observations[name] = tensor
         
         # Extract actions, rewards, dones
         action_sequences = []

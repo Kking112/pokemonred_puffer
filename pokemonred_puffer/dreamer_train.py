@@ -142,15 +142,18 @@ class DreamerV3Trainer:
             output_dim=config.text_output_dim,
         ).to(self.device)
         
-        # Calculate state dimension (non-image observations)
-        # This is a simplified calculation - adjust based on actual observations
+        # Calculate state dimension (only features actually used by encoder)
+        # The encoder uses: direction, map_id, battle_type, level, hp, events
+        state_features_keys = ['direction', 'map_id', 'battle_type', 'level', 'hp', 'events']
         state_dim = sum([
-            np.prod(shape) for name, shape in self.observation_shapes.items()
-            if name not in ['screen', 'visited_mask', 'global_map', 'text']
+            np.prod(self.observation_shapes[key]) 
+            for key in state_features_keys 
+            if key in self.observation_shapes
         ])
         
         # World model
         screen_shape = self.observation_shapes['screen']
+        two_bit = self.config.env.get('two_bit', True)  # Get from env config
         self.world_model = DreamerV3WorldModel(
             action_dim=self.action_dim,
             screen_shape=screen_shape,
@@ -161,6 +164,7 @@ class DreamerV3Trainer:
             stoch_classes=config.stoch_classes,
             hidden_dim=config.hidden_dim,
             encoder_dim=config.encoder_dim,
+            two_bit=two_bit,
         ).to(self.device)
         
         # Actor
@@ -199,7 +203,11 @@ class DreamerV3Trainer:
             obs_tensor = {}
             for key, val in obs.items():
                 if isinstance(val, np.ndarray):
-                    obs_tensor[key] = torch.from_numpy(val).unsqueeze(0).to(self.device)
+                    tensor = torch.from_numpy(val).unsqueeze(0).to(self.device)
+                    # Convert text to Long type for embedding layer
+                    if key == 'text':
+                        tensor = tensor.long()
+                    obs_tensor[key] = tensor
                 else:
                     obs_tensor[key] = torch.tensor([val]).to(self.device)
             
@@ -215,7 +223,11 @@ class DreamerV3Trainer:
                 # Update state (using posterior during collection)
                 # Create dummy action for first step
                 if not hasattr(self, 'last_action'):
-                    self.last_action = torch.zeros(1, self.action_dim).to(self.device)
+                    if self.discrete_actions:
+                        # One-hot encoded action for discrete action spaces
+                        self.last_action = torch.zeros(1, self.action_dim).to(self.device)
+                    else:
+                        self.last_action = torch.zeros(1, self.action_dim).to(self.device)
                 
                 self.current_state, _, _ = self.world_model.rssm.observe_step(
                     self.current_state,
@@ -225,14 +237,25 @@ class DreamerV3Trainer:
                 
                 # Get latent and sample action
                 latent = self.world_model.rssm.get_latent(self.current_state)
-                action, _ = self.actor(latent, deterministic=False)
+                action_idx, _ = self.actor(latent, deterministic=False)
+                
+                # Convert to one-hot encoding for discrete actions
+                if self.discrete_actions:
+                    action = torch.nn.functional.one_hot(
+                        action_idx.long(), 
+                        num_classes=self.action_dim
+                    ).float()
+                else:
+                    action = action_idx
                 
                 self.last_action = action
             
             # Execute action in environment
-            action_np = action.cpu().numpy().squeeze()
             if self.discrete_actions:
-                action_np = int(action_np)
+                # Convert from one-hot back to index
+                action_np = int(action_idx.cpu().item())
+            else:
+                action_np = action.cpu().numpy().squeeze()
             
             result = self.env.step(action_np)
             next_obs, reward, done, truncated, info = result if len(result) == 5 else (*result, {})
@@ -518,10 +541,12 @@ def main():
         )
     
     # Create environment creator
-    # This is a simplified version - adapt based on your setup
+    # Use BaselineRewardEnv which implements the reward function
     def env_creator():
-        from pokemonred_puffer.environment import RedGymEnv
-        return RedGymEnv(config.env)
+        from pokemonred_puffer.rewards.baseline import BaselineRewardEnv
+        # Get reward config or use empty dict
+        reward_config = config.get('reward', {})
+        return BaselineRewardEnv(config.env, reward_config)
     
     # Create trainer
     trainer = DreamerV3Trainer(
