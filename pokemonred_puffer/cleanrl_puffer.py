@@ -35,6 +35,7 @@ from pokemonred_puffer.global_map import GLOBAL_MAP_SHAPE
 from pokemonred_puffer.profile import Profile, Utilization
 from pokemonred_puffer.wrappers.sqlite import SqliteStateResetWrapper
 
+
 pyximport.install(setup_args={"include_dirs": np.get_include()})
 from pokemonred_puffer.c_gae import compute_gae  # type: ignore  # noqa: E402
 
@@ -53,8 +54,10 @@ def rollout(
         )
     except:  # noqa: E722
         env = pufferlib.vector.make(env_creator, env_kwargs=env_kwargs)
-
-    agent = torch.load(model_path, map_location=device)
+    # Add RecurrentPolicy to safe globals, otherwise torch.load will fail
+    # from pokemonred_puffer.policies.multi_convolutional import MultiConvolutionalRNN, MultiConvolutionalPolicy
+    # torch.serialization.add_safe_globals([pufferlib.frameworks.cleanrl.RecurrentPolicy,MultiConvolutionalRNN,MultiConvolutionalPolicy])
+    agent = torch.load(model_path, map_location=device, weights_only=False)
 
     ob, _ = env.reset()
     driver = env.driver_env
@@ -310,7 +313,7 @@ class CleanPuffeRL:
                     print(
                         f"Satisified early stopping constraint for {event} within "
                         f"{self.config.early_stop[event]} minutes. "
-                        f"Event found n {self.profile.uptime // 60} minutes"
+                        f"Event found in {self.profile.uptime // 60} minutes"
                     )
                     del self.config.early_stop[event]
 

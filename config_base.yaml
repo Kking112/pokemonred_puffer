@@ -1,7 +1,6 @@
 wandb:
   entity: neocodes_dev-neocodes
   project: Pokemon_Red_RL
-  exp_name: puffer_pokebaseline_teach_use_cut_v1
   group: ~
 
 env:
@@ -20,7 +19,7 @@ env:
   # If true, save videos.
   save_video: False
   # If true, save sped up videos.
-  fast_video: True
+  fast_video: False
   # Number of environments to save videos for.
   n_record: 10
   # If true, give all party members max base stats.
@@ -38,9 +37,9 @@ env:
   # If true, disable AI input. Useful for debugging.
   disable_ai_actions: False
   # If true, teach cut if possible.
-  auto_teach_cut: True
+  auto_teach_cut: False
   # If true, use cut when standing next to a tree.
-  auto_use_cut: True
+  auto_use_cut: False
   # If true, use strength when walking into a cave if possible.
   auto_use_strength: True
   # If true, use surf when attempting to walk on water.
@@ -92,7 +91,7 @@ env:
 
 train:
   # Random seed
-  seed: 3
+  seed: 1
   # Use deterministic Torch algorithms
   torch_deterministic: True
   # Device to run training on.
@@ -151,11 +150,11 @@ train:
   zero_copy: False
 
   # Verbose terminal reporting.
-  verbose: True
+  verbose: False
   # Directory to store checkpoints in.
   data_dir: runs
   # If true, save checkpoints.
-  save_checkpoint: True
+  save_checkpoint: False
   # How often to save checkpoints.
   checkpoint_interval: 200
 
@@ -187,7 +186,6 @@ train:
     EVENT_BEAT_MISTY: 300
     EVENT_GOT_HM01: 600
     EVENT_BEAT_LT_SURGE: 1200
-  # EVENT_BEAT_CHAMPION_RIVAL: 4800
   # If set, train until all events are accomplished.
   one_epoch:
     - "EVENT_BEAT_CHAMPION_RIVAL"
@@ -213,7 +211,7 @@ wrappers:
 
   baseline:
     - stream_wrapper.StreamWrapper:
-        user: neocodes_dev
+        user: thatguy
     - exploration.DecayWrapper:
         step_forgetting_factor:
           npc: 0.995
@@ -232,7 +230,7 @@ wrappers:
 
   finite_coords:
     - stream_wrapper.StreamWrapper:
-        user: neocodes_dev
+        user: thatguy
     - exploration.MaxLengthWrapper:
         capacity: 1750
     - exploration.OnResetExplorationWrapper:
@@ -244,21 +242,21 @@ wrappers:
         output_dir: runs
         write_frequency: 1000
     - stream_wrapper.StreamWrapper:
-        user: neocodes_dev
+        user: thatguy
     - exploration.OnResetExplorationWrapper:
         full_reset_frequency: 1
         jitter: 1
 
   stream_only:
     - stream_wrapper.StreamWrapper:
-        user: neocodes_dev
+        user: thatguy
     - exploration.OnResetExplorationWrapper:
         full_reset_frequency: 1
         jitter: 1
 
   fixed_reset_value:
     - stream_wrapper.StreamWrapper:
-        user: neocodes_dev
+        user: thatguy
     - exploration.OnResetLowerToFixedValueWrapper:
         fixed_value:
           coords: 0.33

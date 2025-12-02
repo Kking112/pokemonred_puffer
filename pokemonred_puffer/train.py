@@ -139,6 +139,7 @@ def init_wandb(
     resume: bool = True,
 ):
     if not config.track:
+        print("Not tracking")
         yield None
     else:
         assert config.wandb.project is not None, "Please set the wandb project in config.yaml"

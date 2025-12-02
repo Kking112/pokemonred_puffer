@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ignore any folders that start with 2025
+2025*/
+
 # C extensions
 *.so
 
