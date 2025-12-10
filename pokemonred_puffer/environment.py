@@ -209,12 +209,12 @@ class RedGymEnv(Env):
             ),
             "bag_quantity": spaces.Box(low=0, high=100, shape=(20,), dtype=np.uint8),
             # This could be a dict within a sequence, but we'll do it like this and concat later
-            "species": spaces.Box(low=0, high=0xBE, shape=(6,), dtype=np.uint8),
+            "species": spaces.Box(low=0, high=0xBE, shape=(8,), dtype=np.uint8),
             "hp": spaces.Box(low=0, high=714, shape=(6,), dtype=np.uint32),
-            "status": spaces.Box(low=0, high=7, shape=(6,), dtype=np.uint8),
-            "type1": spaces.Box(low=0, high=0x1A, shape=(6,), dtype=np.uint8),
-            "type2": spaces.Box(low=0, high=0x1A, shape=(6,), dtype=np.uint8),
-            "level": spaces.Box(low=0, high=100, shape=(6,), dtype=np.uint8),
+            "status": spaces.Box(low=0, high=7, shape=(8,), dtype=np.uint8),
+            "type1": spaces.Box(low=0, high=0x1A, shape=(8,), dtype=np.uint8),
+            "type2": spaces.Box(low=0, high=0x1A, shape=(8,), dtype=np.uint8),
+            "level": spaces.Box(low=0, high=100, shape=(8,), dtype=np.uint8),
             "maxHP": spaces.Box(low=0, high=714, shape=(6,), dtype=np.uint32),
             "attack": spaces.Box(low=0, high=714, shape=(6,), dtype=np.uint32),
             "defense": spaces.Box(low=0, high=714, shape=(6,), dtype=np.uint32),
@@ -227,6 +227,7 @@ class RedGymEnv(Env):
             "game_corner_rocket": spaces.Box(low=0, high=1, shape=(1,), dtype=np.uint8),
             "saffron_guard": spaces.Box(low=0, high=1, shape=(1,), dtype=np.uint8),
             "lapras": spaces.Box(low=0, high=1, shape=(1,), dtype=np.uint8),
+            "text": spaces.Box(low=0, high=255, shape=(72,), dtype=np.uint8),
         }
         if not self.skip_safari_zone:
             obs_dict["safari_steps"] = spaces.Box(low=0, high=502.0, shape=(1,), dtype=np.uint32)
@@ -665,12 +666,22 @@ class RedGymEnv(Env):
                 "map_id": np.array(self.read_m(0xD35E), dtype=np.uint8),
                 "bag_items": bag[::2].copy(),
                 "bag_quantity": bag[1::2].copy(),
-                "species": np.array([self.party[i].Species for i in range(6)], dtype=np.uint8),
+                "species": np.pad(
+                    np.array([self.party[i].Species for i in range(6)], dtype=np.uint8), (0, 2), constant_values=0
+                ),
                 "hp": np.array([self.party[i].HP for i in range(6)], dtype=np.uint32),
-                "status": np.array([self.party[i].Status for i in range(6)], dtype=np.uint8),
-                "type1": np.array([self.party[i].Type1 for i in range(6)], dtype=np.uint8),
-                "type2": np.array([self.party[i].Type2 for i in range(6)], dtype=np.uint8),
-                "level": np.array([self.party[i].Level for i in range(6)], dtype=np.uint8),
+                "status": np.pad(
+                    np.array([self.party[i].Status for i in range(6)], dtype=np.uint8), (0, 2), constant_values=0
+                ),
+                "type1": np.pad(
+                    np.array([self.party[i].Type1 for i in range(6)], dtype=np.uint8), (0, 2), constant_values=0
+                ),
+                "type2": np.pad(
+                    np.array([self.party[i].Type2 for i in range(6)], dtype=np.uint8), (0, 2), constant_values=0
+                ),
+                "level": np.pad(
+                    np.array([self.party[i].Level for i in range(6)], dtype=np.uint8), (0, 2), constant_values=0
+                ),
                 "maxHP": np.array([self.party[i].MaxHP for i in range(6)], dtype=np.uint32),
                 "attack": np.array([self.party[i].Attack for i in range(6)], dtype=np.uint32),
                 "defense": np.array([self.party[i].Defense for i in range(6)], dtype=np.uint32),
@@ -688,6 +699,9 @@ class RedGymEnv(Env):
                     self.flags.get_bit("BIT_GAVE_SAFFRON_GUARDS_DRINK"), np.uint8
                 ),  # saffron guard
                 "lapras": np.array(self.flags.get_bit("BIT_GOT_LAPRAS"), np.uint8),  # got lapras
+                "text": np.array(
+                    self.pyboy.tilemap_window[1:19, 14:18], dtype=np.uint8
+                ).flatten(),
             }
             | (
                 {}

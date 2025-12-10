@@ -1,7 +1,7 @@
 wandb:
   entity: neocodes_dev-neocodes
   project: Pokemon_Red_RL
-  exp_name: puffer_pokebaseline_teach_use_cut_v1
+  exp_name: puffer_pokebaseline_text_v1.1
   group: ~
 
 env:
@@ -469,6 +469,18 @@ policies:
         input_size: 512
         hidden_size: 512
         num_layers: 1
+
+  multi_modal.MultiModalPolicy:
+    policy:
+      hidden_size: 512
+
+    rnn:
+      name: MultiModalRNN
+      args:
+        input_size: 512
+        hidden_size: 512
+        num_layers: 1
+
 
 # Debug overrides.
 debug:
