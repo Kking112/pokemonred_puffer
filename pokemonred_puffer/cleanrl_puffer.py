@@ -211,6 +211,37 @@ class CleanPuffeRL:
             self.archive_path.mkdir(exist_ok=False)
             print(f"Will archive states to {self.archive_path}")
 
+    def _drain_pending_workers(self):
+        """
+        Drain all pending workers to ensure they've completed their current step.
+        
+        This is necessary before calling async_reset() during swarm migration.
+        The async_reset() method has a flush loop that waits for all workers to
+        have semaphore >= MAIN (indicating they've finished their step). If workers
+        are still mid-step when async_reset() is called, the flush loop spins
+        indefinitely, causing the training to hang.
+        
+        By draining here, we ensure all workers are in a ready state before reset.
+        """
+        try:
+            # Check if vecenv has the waiting_workers attribute (Multiprocessing backend)
+            if hasattr(self.vecenv, 'waiting_workers') and self.vecenv.waiting_workers:
+                print(f"[Swarm Migration] Draining {len(self.vecenv.waiting_workers)} pending workers...")
+                # Keep receiving until all workers are ready
+                max_drain_attempts = 100  # Safety limit to prevent infinite loop
+                drain_count = 0
+                while self.vecenv.waiting_workers and drain_count < max_drain_attempts:
+                    # recv() will wait for workers to complete and collect their results
+                    _, _, _, _, _, _, _ = self.vecenv.recv()
+                    drain_count += 1
+                if drain_count > 0:
+                    print(f"[Swarm Migration] Drained {drain_count} batches of worker results")
+                if drain_count >= max_drain_attempts:
+                    print(f"[Swarm Migration] Warning: Hit max drain attempts ({max_drain_attempts})")
+        except Exception as e:
+            # If draining fails, log but continue - the original code path will handle it
+            print(f"[Swarm Migration] Warning: Failed to drain workers: {e}")
+
     @pufferlib.utils.profile
     def evaluate(self):
         # states are managed separately so dont worry about deleting them
@@ -274,11 +305,18 @@ class CleanPuffeRL:
                                 with open(state_dir / f"{hash(v)}.state", "wb") as f:
                                     f.write(v)
                         elif "required_count" == k:
+                            # FIX: Append current value FIRST, then process
+                            # Previously, we iterated over self.infos before appending,
+                            # which meant the current env_id was never processed.
+                            self.infos[k].append(v)
+                            # Also append env_id if it exists in the same info dict
+                            # (it should be processed by 'else' branch, but ensure it's there)
+                            if "env_id" not in self.infos:
+                                self.infos["env_id"] = []
                             for count, eid in zip(
                                 self.infos["required_count"], self.infos["env_id"]
                             ):
                                 self.event_tracker[eid] = max(self.event_tracker.get(eid, 0), count)
-                            self.infos[k].append(v)
                         else:
                             self.infos[k].append(v)
 
@@ -363,6 +401,14 @@ class CleanPuffeRL:
                 and "required_count" in self.infos
                 and self.states
             ):
+                # FIX: Drain any pending workers before swarm migration.
+                # The async_reset() method has a flush loop that blocks indefinitely
+                # waiting for workers to complete their current step. If we call
+                # async_reset() immediately after exiting the evaluate loop, workers
+                # may still be mid-step, causing the flush loop to hang.
+                # By calling recv() here, we ensure all workers have committed their
+                # results before we try to reset.
+                self._drain_pending_workers()
                 """
                 # V1 implementation - 
                 #     collect the top swarm_keep_pct % of the envs in the batch
@@ -434,9 +480,32 @@ class CleanPuffeRL:
                                     ),
                                 )
                         self.vecenv.async_reset()
-                        # drain any INFO
-                        key_set = self.event_tracker.keys()
+                        # Wait for all environments in event_tracker to reset
+                        # FIX: Added timeout and debugging to diagnose hang
+                        key_set = set(self.event_tracker.keys())  # Convert to set for faster lookup
+                        print(f"[Swarm Migration] Waiting for {len(key_set)} envs to reset: {sorted(key_set)[:10]}...")
+                        
+                        # Check what's in the database
+                        with SqliteStateResetWrapper.DB_LOCK:
+                            with sqlite3.connect(self.sqlite_db) as conn:
+                                cur = conn.cursor()
+                                all_rows = cur.execute("SELECT env_id, reset FROM states").fetchall()
+                        db_env_ids = {row[0] for row in all_rows}
+                        print(f"[Swarm Migration] Database has {len(db_env_ids)} env_ids: {sorted(db_env_ids)[:10]}...")
+                        
+                        # Check for mismatches
+                        missing_from_db = key_set - db_env_ids
+                        if missing_from_db:
+                            print(f"[Swarm Migration] WARNING: {len(missing_from_db)} env_ids in event_tracker but NOT in database: {sorted(missing_from_db)[:10]}...")
+                            # Remove missing env_ids from key_set to avoid waiting forever
+                            key_set = key_set & db_env_ids
+                            print(f"[Swarm Migration] Adjusted to wait for {len(key_set)} envs")
+                        
+                        max_wait_seconds = 60  # Timeout after 60 seconds
+                        wait_start = time.time()
+                        check_count = 0
                         while True:
+                            check_count += 1
                             # We connect each time just in case we block the wrappers
                             with SqliteStateResetWrapper.DB_LOCK:
                                 with sqlite3.connect(self.sqlite_db) as conn:
@@ -447,8 +516,25 @@ class CleanPuffeRL:
                                         FROM states
                                         """,
                                     ).fetchall()
+                            
+                            # Count how many are still pending
+                            pending = [(env_id, reset) for reset, env_id in resets if env_id in key_set and reset]
+                            if check_count <= 5 or check_count % 20 == 0:
+                                print(f"[Swarm Migration] Check {check_count}: {len(pending)} envs still pending reset")
+                                if pending and check_count <= 3:
+                                    print(f"[Swarm Migration] Pending env_ids: {[p[0] for p in pending[:10]]}...")
+                            
                             if all(not reset for reset, env_id in resets if env_id in key_set):
+                                print(f"[Swarm Migration] All environments reset after {check_count} checks ({time.time() - wait_start:.1f}s)")
                                 break
+                            
+                            # Timeout check
+                            elapsed = time.time() - wait_start
+                            if elapsed > max_wait_seconds:
+                                print(f"[Swarm Migration] TIMEOUT after {elapsed:.1f}s! {len(pending)} envs still pending.")
+                                print(f"[Swarm Migration] Forcing continue despite pending resets...")
+                                break
+                            
                             time.sleep(0.5)
                     if self.config.async_wrapper:
                         for key, state in zip(self.event_tracker.keys(), new_states):
