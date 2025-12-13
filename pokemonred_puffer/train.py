@@ -144,8 +144,10 @@ def init_wandb(
     else:
         assert config.wandb.project is not None, "Please set the wandb project in config.yaml"
         assert config.wandb.entity is not None, "Please set the wandb entity in config.yaml"
+        # make date & time string to append to run id 
+        run_datetime = time.strftime("%Y.%m.%d-%H.%M.%S")
         wandb_kwargs = {
-            "id": exp_name or wandb.util.generate_id(),
+            "id": config.wandb.exp_name + "_" + run_datetime #or wandb.util.generate_id(),
             "project": config.wandb.project,
             "entity": config.wandb.entity,
             "group": config.wandb.group,

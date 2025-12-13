@@ -1,6 +1,6 @@
 wandb:
   entity: neocodes_dev-neocodes
-  project: Pokemon_Red_RL
+  project: Pokemon_Red_RL_V2
   exp_name: puffer_pokebaseline_teach_use_cut_v1
   group: ~
 
