@@ -369,6 +369,9 @@ class ObjectRewardRequiredEventsMapIds(BaselineRewardEnv):
     def get_game_state_reward(self) -> dict[str, float]:
         _, wBagItems = self.pyboy.symbol_lookup("wBagItems")
         numBagItems = self.read_m("wNumBagItems")
+        # ! TODO: This causes an exception:
+        # pyboy.utils.PyBoyInvalidInputException: Start address has to come before end address
+        # Need to fix this...
         bag_item_ids = set(self.pyboy.memory[wBagItems : wBagItems + 2 * numBagItems : 2])
 
         return (

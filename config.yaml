@@ -1,7 +1,7 @@
 wandb:
   entity: neocodes_dev-neocodes
-  project: Pokemon_Red_RL
-  exp_name: puffer_pokebaseline_teach_use_cut_v1
+  project: Pokemon_Red_RL_V2
+  exp_name: puffer_pokebaseline_hang_fix
   group: ~
 
 env:
@@ -151,7 +151,7 @@ train:
   zero_copy: False
 
   # Verbose terminal reporting.
-  verbose: True
+  verbose: False
   # Directory to store checkpoints in.
   data_dir: runs
   # If true, save checkpoints.
@@ -187,7 +187,7 @@ train:
     EVENT_BEAT_MISTY: 300
     EVENT_GOT_HM01: 600
     EVENT_BEAT_LT_SURGE: 1200
-  # EVENT_BEAT_CHAMPION_RIVAL: 4800
+    EVENT_BEAT_CHAMPION_RIVAL: 4800
   # If set, train until all events are accomplished.
   one_epoch:
     - "EVENT_BEAT_CHAMPION_RIVAL"

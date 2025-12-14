@@ -408,7 +408,7 @@ class CleanPuffeRL:
                 # may still be mid-step, causing the flush loop to hang.
                 # By calling recv() here, we ensure all workers have committed their
                 # results before we try to reset.
-                self._drain_pending_workers()
+                # self._drain_pending_workers()
                 """
                 # V1 implementation - 
                 #     collect the top swarm_keep_pct % of the envs in the batch
@@ -479,63 +479,15 @@ class CleanPuffeRL:
                                         ]
                                     ),
                                 )
-                        self.vecenv.async_reset()
-                        # Wait for all environments in event_tracker to reset
-                        # FIX: Added timeout and debugging to diagnose hang
-                        key_set = set(self.event_tracker.keys())  # Convert to set for faster lookup
-                        print(f"[Swarm Migration] Waiting for {len(key_set)} envs to reset: {sorted(key_set)[:10]}...")
-                        
-                        # Check what's in the database
-                        with SqliteStateResetWrapper.DB_LOCK:
-                            with sqlite3.connect(self.sqlite_db) as conn:
-                                cur = conn.cursor()
-                                all_rows = cur.execute("SELECT env_id, reset FROM states").fetchall()
-                        db_env_ids = {row[0] for row in all_rows}
-                        print(f"[Swarm Migration] Database has {len(db_env_ids)} env_ids: {sorted(db_env_ids)[:10]}...")
-                        
-                        # Check for mismatches
-                        missing_from_db = key_set - db_env_ids
-                        if missing_from_db:
-                            print(f"[Swarm Migration] WARNING: {len(missing_from_db)} env_ids in event_tracker but NOT in database: {sorted(missing_from_db)[:10]}...")
-                            # Remove missing env_ids from key_set to avoid waiting forever
-                            key_set = key_set & db_env_ids
-                            print(f"[Swarm Migration] Adjusted to wait for {len(key_set)} envs")
-                        
-                        max_wait_seconds = 60  # Timeout after 60 seconds
-                        wait_start = time.time()
-                        check_count = 0
-                        while True:
-                            check_count += 1
-                            # We connect each time just in case we block the wrappers
-                            with SqliteStateResetWrapper.DB_LOCK:
-                                with sqlite3.connect(self.sqlite_db) as conn:
-                                    cur = conn.cursor()
-                                    resets = cur.execute(
-                                        """
-                                        SELECT reset, env_id
-                                        FROM states
-                                        """,
-                                    ).fetchall()
-                            
-                            # Count how many are still pending
-                            pending = [(env_id, reset) for reset, env_id in resets if env_id in key_set and reset]
-                            if check_count <= 5 or check_count % 20 == 0:
-                                print(f"[Swarm Migration] Check {check_count}: {len(pending)} envs still pending reset")
-                                if pending and check_count <= 3:
-                                    print(f"[Swarm Migration] Pending env_ids: {[p[0] for p in pending[:10]]}...")
-                            
-                            if all(not reset for reset, env_id in resets if env_id in key_set):
-                                print(f"[Swarm Migration] All environments reset after {check_count} checks ({time.time() - wait_start:.1f}s)")
-                                break
-                            
-                            # Timeout check
-                            elapsed = time.time() - wait_start
-                            if elapsed > max_wait_seconds:
-                                print(f"[Swarm Migration] TIMEOUT after {elapsed:.1f}s! {len(pending)} envs still pending.")
-                                print(f"[Swarm Migration] Forcing continue despite pending resets...")
-                                break
-                            
-                            time.sleep(0.5)
+                        # FIX: Removed async_reset() and wait loop that caused hang.
+                        # The SQLite wrapper handles state migration automatically:
+                        # 1. We just set reset=1 and pyboy_state in the database above
+                        # 2. When environments naturally reset (episode ends), 
+                        #    SqliteStateResetWrapper.reset() reads the database
+                        # 3. If reset=1, it loads the new state and sets reset=0
+                        # No forced async reset needed - environments pick up new state
+                        # on their next natural episode end.
+                        print(f"[Swarm Migration] Database updated with new states for {len(self.event_tracker.keys())} environments")
                     if self.config.async_wrapper:
                         for key, state in zip(self.event_tracker.keys(), new_states):
                             self.env_recv_queues[key].put(state)

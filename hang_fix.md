@@ -1,43 +1,35 @@
-# Hang Fix for Swarm Migration (v2)
+# Hang Fix for Swarm Migration (v3 - FINAL)
 
 ## Problem
-Training script hangs indefinitely after swarm migration is triggered (after "New events..." is printed).
+Training hangs indefinitely after swarm migration is triggered (after "New events..." is printed).
 
 ## Root Cause
-The wait loop at lines 485-498 waits for all environments in `event_tracker.keys()` to have their `reset` flag cleared in the SQLite database. The loop hangs if:
-1. `event_tracker` contains env_ids not in the database
-2. Worker environments don't complete their reset within expected time
-3. There's a lock contention issue with `DB_LOCK`
+The hang was in `self.vecenv.async_reset()` (line 482). The pufferlib `async_reset()` has a flush loop that blocks indefinitely waiting for workers to complete their steps. Since the vecenv was in an invalid state ("Call reset before stepping"), workers couldn't complete and the flush loop hung forever.
 
-## Changes Made (v2)
+## Solution
+**Removed `async_reset()` and wait loop entirely.**
+
+The SQLite wrapper already handles state migration automatically:
+1. Database UPDATE sets `reset=1` and stores new `pyboy_state`
+2. Environments continue running normally
+3. When episodes naturally end, `SqliteStateResetWrapper.reset()` reads the database
+4. If `reset=1`, it loads the new state and sets `reset=0`
+
+No forced reset needed - environments pick up new state on their next natural episode end.
+
+## Changes Made
 
 ### `pokemonred_puffer/cleanrl_puffer.py`
+- Removed `self.vecenv.async_reset()` call
+- Removed the entire wait loop (polling for `reset=0`)
+- Added explanatory comment and simple log message
 
-1. **Added timeout to wait loop** (60 seconds max)
-   - Prevents infinite hang - training continues after timeout
-
-2. **Added extensive debugging output**
-   - Shows env_ids being waited on vs database env_ids
-   - Detects mismatched env_ids
-   - Logs progress of reset wait
-
-3. **Handles missing env_ids**
-   - If env_ids in event_tracker don't exist in database, they're skipped
-
-## Debug Output
-When swarm migration triggers, you'll see:
+## Expected Output
 ```
-[Swarm Migration] Waiting for X envs to reset: [list]...
-[Swarm Migration] Database has Y env_ids: [list]...
-[Swarm Migration] Check 1: Z envs still pending reset
-[Swarm Migration] Pending env_ids: [list]...
+Satisified early stopping constraint for EVENT_BEAT_BROCK within 30 minutes. Event found in 27.0 minutes
+    New events (9): (...)
+[Swarm Migration] Database updated with new states for X environments
+State migration to <path> complete
 ```
 
-If it times out:
-```
-[Swarm Migration] TIMEOUT after 60.0s! N envs still pending.
-[Swarm Migration] Forcing continue despite pending resets...
-```
-
-## Testing
-Run training and let it reach the first EVENT_BEAT_BROCK. The debug output will help identify exactly why the wait loop isn't completing.
+Training should continue without hanging.
