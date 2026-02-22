@@ -173,3 +173,5 @@ experiments
 runs
 video
 wandb
+old_run_states_logs
+.omc/*
