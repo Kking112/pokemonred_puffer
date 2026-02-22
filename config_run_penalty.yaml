@@ -1,12 +1,12 @@
 wandb:
   entity: neocodes_dev-neocodes
   project: Pokemon_Red_RL_V2
-  exp_name: puffer_pokebaseline_wild_encounters_on_12_20_25
+  exp_name: puffer_run_penalty_12.29.25
   group: ~
 
 env:
   # If true, run without rendering every step.
-  headless: True
+  headless: True   #for eval or debugging
   # Directory to store video output.
   video_dir: video
   # Directory with pyboy save states to load from.
@@ -452,6 +452,43 @@ rewards:
       valid_cut_coords: 4.822387218475342
       valid_pokeflute_coords: 4.840555191040039
       valid_surf_coords: 4.8967742919921875
+
+  # Run penalty reward - penalizes running from battles, rewards trainer wins
+  run_wrapper.RunPenaltyRewardEnv:
+    reward:
+      # === Base rewards from ObjectRewardRequiredEventsMapIds ===
+      a_press: 0.0
+      badges: 3.0
+      bag_menu: 0.0
+      caught_pokemon: 2.5
+      valid_cut_coords: 1.5
+      event: 0.75
+      exploration: 0.019
+      explore_hidden_objs: 0.0001
+      explore_signs: 0.015
+      explore_warps: 0.01
+      hm_count: 7.5
+      invalid_cut_coords: 0.0001
+      level: 1.05
+      obtained_move_ids: 4.0
+      pokecenter_heal: 0.47
+      pokemon_menu: 0.0
+      required_event: 7.0
+      required_item: 3.0
+      seen_action_bag_menu: 0.0
+      seen_pokemon: 2.5
+      start_menu: 0.0
+      stats_menu: 0.0
+      use_surf: 0.4
+      useful_item: 0.825
+      safari_zone: 3.45
+      cut_tiles: 1.0
+      pokeflute_tiles: 1.0
+      surf_tiles: 1.0
+      use_ball_count: -10.0
+      # === NEW: Run penalty and trainer battle rewards ===
+      run_penalty: -2.0            # Negative reward per run attempt
+      trainer_battle_win: 5.0      # Positive reward for winning trainer battles
 
 # Policies to use for training.
 # Each policy is keyed by a name for the commandline.

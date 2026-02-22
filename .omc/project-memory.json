@@ -1,0 +1,667 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1771735133014,
+  "projectRoot": "/home/neo/Desktop/Projects/Experiments/RL_Gameboy_Experiments/RL_Gameboy/poke-baseline",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "pyproject.toml",
+          "requirements.txt"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "pytest",
+        "version": null,
+        "category": "testing"
+      }
+    ],
+    "packageManager": "pip",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": "pytest",
+    "lintCommand": "ruff check",
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "assets",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "20251126-170116": {
+      "path": "20251126-170116",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133008,
+      "keyFiles": []
+    },
+    "20251126-171906": {
+      "path": "20251126-171906",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-171949": {
+      "path": "20251126-171949",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-172328": {
+      "path": "20251126-172328",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-180607": {
+      "path": "20251126-180607",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-184910": {
+      "path": "20251126-184910",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-191631": {
+      "path": "20251126-191631",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-192349": {
+      "path": "20251126-192349",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-213644": {
+      "path": "20251126-213644",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-223023": {
+      "path": "20251126-223023",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133009,
+      "keyFiles": []
+    },
+    "20251126-231332": {
+      "path": "20251126-231332",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251127-194656": {
+      "path": "20251127-194656",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251130-214837": {
+      "path": "20251130-214837",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251130-222120": {
+      "path": "20251130-222120",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251201-200238": {
+      "path": "20251201-200238",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251202-100322": {
+      "path": "20251202-100322",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251202-113757": {
+      "path": "20251202-113757",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251202-181911": {
+      "path": "20251202-181911",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251202-202642": {
+      "path": "20251202-202642",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251202-220445": {
+      "path": "20251202-220445",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-213224": {
+      "path": "20251207-213224",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-215325": {
+      "path": "20251207-215325",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-215456": {
+      "path": "20251207-215456",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-215731": {
+      "path": "20251207-215731",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-220011": {
+      "path": "20251207-220011",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-220215": {
+      "path": "20251207-220215",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-220515": {
+      "path": "20251207-220515",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133010,
+      "keyFiles": []
+    },
+    "20251207-220737": {
+      "path": "20251207-220737",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251207-220850": {
+      "path": "20251207-220850",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251207-221050": {
+      "path": "20251207-221050",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251208-202246": {
+      "path": "20251208-202246",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251208-202448": {
+      "path": "20251208-202448",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251210-182911": {
+      "path": "20251210-182911",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251210-195034": {
+      "path": "20251210-195034",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251210-203529": {
+      "path": "20251210-203529",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251210-211716": {
+      "path": "20251210-211716",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251213-185243": {
+      "path": "20251213-185243",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251213-185357": {
+      "path": "20251213-185357",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251213-194300": {
+      "path": "20251213-194300",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251213-220926": {
+      "path": "20251213-220926",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251213-225657": {
+      "path": "20251213-225657",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251215-212729": {
+      "path": "20251215-212729",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251215-212912": {
+      "path": "20251215-212912",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251219-132112": {
+      "path": "20251219-132112",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251220-182945": {
+      "path": "20251220-182945",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133011,
+      "keyFiles": []
+    },
+    "20251220-211422": {
+      "path": "20251220-211422",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133012,
+      "keyFiles": []
+    },
+    "20251229-211525": {
+      "path": "20251229-211525",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133012,
+      "keyFiles": []
+    },
+    "20251229-211713": {
+      "path": "20251229-211713",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133012,
+      "keyFiles": []
+    },
+    "20260203-111056": {
+      "path": "20260203-111056",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133012,
+      "keyFiles": []
+    },
+    "20260203-212519": {
+      "path": "20260203-212519",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133012,
+      "keyFiles": []
+    },
+    "assets": {
+      "path": "assets",
+      "purpose": "Static assets",
+      "fileCount": 1,
+      "lastAccessed": 1771735133012,
+      "keyFiles": [
+        "puffer.png"
+      ]
+    },
+    "pokemonred_puffer": {
+      "path": "pokemonred_puffer",
+      "purpose": null,
+      "fileCount": 14,
+      "lastAccessed": 1771735133012,
+      "keyFiles": [
+        "__init__.py",
+        "c_gae.pyx",
+        "cleanrl_puffer.py",
+        "environment.py",
+        "eval.py"
+      ]
+    },
+    "pokemonred_puffer.egg-info": {
+      "path": "pokemonred_puffer.egg-info",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1771735133012,
+      "keyFiles": [
+        "PKG-INFO",
+        "SOURCES.txt",
+        "dependency_links.txt",
+        "requires.txt",
+        "top_level.txt"
+      ]
+    },
+    "pyboy_states": {
+      "path": "pyboy_states",
+      "purpose": null,
+      "fileCount": 29,
+      "lastAccessed": 1771735133012,
+      "keyFiles": [
+        "Bulbasaur.state",
+        "Charmander.state",
+        "Squirtle.state",
+        "beat_champion.state",
+        "beat_lance_1.state"
+      ]
+    },
+    "runs": {
+      "path": "runs",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133012,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1771735133012,
+      "keyFiles": [
+        "test_environment.py"
+      ]
+    },
+    "video": {
+      "path": "video",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1771735133012,
+      "keyFiles": []
+    },
+    "wandb": {
+      "path": "wandb",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1771735133012,
+      "keyFiles": [
+        "debug-cli.neo.log"
+      ]
+    },
+    "pokemonred_puffer/data": {
+      "path": "pokemonred_puffer/data",
+      "purpose": "Data files",
+      "fileCount": 14,
+      "lastAccessed": 1771735133014,
+      "keyFiles": [
+        "bag.py",
+        "elevators.py",
+        "events.py"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1771737052692,
+      "type": "file"
+    },
+    {
+      "path": "pyproject.toml",
+      "accessCount": 1,
+      "lastAccessed": 1771737053310,
+      "type": "file"
+    },
+    {
+      "path": "config.yaml",
+      "accessCount": 1,
+      "lastAccessed": 1771737053866,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737054422,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/train.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737059663,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/environment.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737060495,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/rewards/baseline.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737061382,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/rewards/run_wrapper.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737062061,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/policies/multi_convolutional.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737062779,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/eval.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737063488,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/wrappers/exploration.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737068569,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/wrappers/episode_stats.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737069406,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/wrappers/stream_wrapper.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737070298,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/cleanrl_puffer.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737071191,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/data/events.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737072022,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/global_map.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737072801,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/resnet.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737073579,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_environment.py",
+      "accessCount": 1,
+      "lastAccessed": 1771737074239,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771737497025,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787515100,
+      "type": "file"
+    },
+    {
+      "path": "tests/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787515150,
+      "type": "file"
+    },
+    {
+      "path": "pyboy_states/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787515211,
+      "type": "file"
+    },
+    {
+      "path": "assets/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787515278,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/data/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787540522,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/rewards/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787557889,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/wrappers/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787576353,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/policies/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787591791,
+      "type": "file"
+    },
+    {
+      "path": "pokemonred_puffer/visualizations/AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1771787597940,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
